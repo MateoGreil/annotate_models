@@ -183,12 +183,17 @@ module AnnotateModels
 
     def get_schema_header_text(klass, options = {})
       info = "#\n"
+      type = if klass.respond_to?(:type)
+               klass.type.humanize.titlecase
+             else
+               'Table'
+             end
       if options[:format_markdown]
-        info << "# Table name: `#{klass.table_name}`\n"
+        info << "# #{type} name: `#{klass.table_name}`\n"
         info << "#\n"
         info << "# ### Columns\n"
       else
-        info << "# Table name: #{klass.table_name}\n"
+        info << "# #{type} name: #{klass.table_name}\n"
       end
       info << "#\n"
     end
@@ -371,7 +376,7 @@ module AnnotateModels
       return false if old_content =~ /#{SKIP_ANNOTATION_PREFIX}.*\n/
 
       # Ignore the Schema version line because it changes with each migration
-      header_pattern = /(^# Table name:.*?\n(#.*[\r]?\n)*[\r]?)/
+      header_pattern = /(^# (Table|View|Materialized View) name:.*?\n(#.*[\r]?\n)*[\r]?)/
       old_header = old_content.match(header_pattern).to_s
       new_header = info_block.match(header_pattern).to_s
 
